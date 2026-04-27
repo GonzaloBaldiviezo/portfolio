@@ -5,7 +5,7 @@ import ArrowRight from "./icons/ArrowRight.astro"
 interface Props {
   title: string
   company: string
-  description: string
+  description: string | string[]
   link?: string
   date: string
   current?: boolean
@@ -39,11 +39,19 @@ const { title, company, description, link, date, current = false } = Astro.props
     </div>
   </div>
   <div class="relative flex flex-col gap-2 pb-4 text-gray-600 dark:text-gray-300 md:col-span-3">
-    {description}
+    {
+      Array.isArray(description) ? (
+        <ul class="space-y-2 pl-5 list-disc marker:text-yellow-400">
+          {description.map((item) => <li>{item}</li>)}
+        </ul>
+      ) : (
+        description
+      )
+    }
     {
       link && (
-        <LinkInline href={link}>
-          Saber más sobre {company}{" "}
+        <LinkInline href={link} target="_blank" rel="noreferrer noopener">
+          Discover more about {company}{" "}
           <ArrowRight class="size-5" aria-hidden="true" />
         </LinkInline>
       )

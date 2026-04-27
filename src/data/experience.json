@@ -1,22 +1,27 @@
 [
   {
-    "date": "Septiembre 2022 - Actualidad",
-    "title": "Creador de Contenido",
-    "company": "Twitch",
-    "description": "Divulgo sobre programación y desarrollo web en diferentes plataformas. Galardonado como mejor creador de contenido de habla no-inglesa en 2022 y mejor comunidad en 2023 por GitHub.",
-    "link": "https://twitch.tv/midudev",
+    "date": "September 2022 - Present",
+    "title": "QA Automation Engineer",
+    "company": "Revai",
+    "description": [
+      "Built and maintained automated tests for APIs and frontend flows using Playwright and TypeScript, contributing to a suite of 3000+ API tests and 200+ E2E tests.",
+      "Developed an internal platform to centralize test execution, reporting, and coverage across services, used to manage and monitor daily test runs.",
+      "Enabled automated scheduling of test runs and reporting, improving visibility and reducing manual effort across teams.",
+      "Automated critical end-to-end user journeys, increasing test coverage and helping prevent production issues.",
+      "Integrated test suites into CI/CD pipelines to ensure continuous validation on each deployment, with tests running daily and maintaining consistently high pass rates."
+    ],
+    "link": "https://revaicare.com/",
     "current": true
   },
   {
-    "date": "Junio 2016 - Septiembre 2022",
-    "title": "Lead Frontend Architect",
-    "company": "Adevinta Spain",
-    "description": "Parte del equipo Enablers Frontend en Adevinta Spain. Nuestra misión era conseguir que todos los verticales (Fotocasa, MilAnuncios, Habitaclia, Coches.net, Infojobs) convergieran tecnológicamente, con una arquitectura moderna, flexible y optimizada, fomentando buenas prácticas y dando talleres para compartir conocimiento."
-  },
-  {
-    "date": "Marzo 2011 - Mayo 2016",
-    "title": "Senior Full-Stack Developer",
-    "company": "Hubii",
-    "description": "Start-up sobre localización de noticias y servicios de información. Desarrollé el website con Jade, BEM, Stylus y CoffeeScript; app de Firefox OS offline-first a 60fps; app de Smart TV con accesibilidad por mando a distancia y push notifications; y una API de Insights con NodeJS, Swagger y MongoDB para parsear contenido web con Big Data."
+    "date": "November 2021 - August 2022",
+    "title": "QA Automation Engineer",
+    "company": "Ohana",
+    "description": [
+      "Worked on QA automation for a FinTech virtual wallet platform.",
+      "Developed automated test suites for backend APIs.",
+      "Integrated automated tests into CI/CD pipelines to support continuous delivery."
+    ],
+    "link": "https://ohana.digital/"
   }
 ]
