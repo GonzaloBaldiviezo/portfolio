@@ -1,27 +1,34 @@
-# 👨🏻‍💻 Porfolio para programadores y desarrolladores
+# Portfolio
 
-<div align="center">
-<a href="https://porfolio.dev/">
-<img src="./public/porfolio.webp">
-</a>
-<p></p>
-</div>
+Personal portfolio built with Astro, Tailwind CSS, and TypeScript.
 
-<div align="center">
+## About
 
-![Astro Badge](https://img.shields.io/badge/Astro-FF3E00?logo=astro&logoColor=fff&style=flat)
-![Tailwind CSS Badge](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=fff&style=flat)
-![GitHub stars](https://img.shields.io/github/stars/midudev/porfolio.dev)
-![GitHub PRs](https://img.shields.io/github/issues-pr/midudev/porfolio.dev)
-![GitHub forks](https://img.shields.io/github/forks/midudev/porfolio.dev)
-![GitHub issues](https://img.shields.io/github/issues/midudev/porfolio.dev)
+This project is a lightweight portfolio template for presenting work, experience, and contact information in a clean layout.
 
-</div>
+## Tech Stack
 
-## 🫂 Contribuidores
+- Astro
+- Tailwind CSS
+- TypeScript
 
-<a href="https://github.com/midudev/porfolio.dev/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=midudev/porfolio.dev" />
-</a>
+## Getting Started
 
-<p></p>
+```bash
+pnpm install
+pnpm dev
+```
+
+## Available Scripts
+
+- `pnpm dev` starts the local development server.
+- `pnpm build` runs the type check and creates a production build.
+- `pnpm preview` previews the production build locally.
+
+## Reference
+
+This project is based on the original [porfolio.dev](https://github.com/midudev/porfolio.dev) repository by midudev. I kept the structure as a reference and adapted the content and styling to my own portfolio.
+
+## Notes
+
+The site is intentionally kept simple and minimal so the content and projects stay front and center.
