@@ -22,6 +22,11 @@ const navItems = [
     label: "contacto",
     url: "mailto:gonzabaldiviezo@gmail.com",
   },
+  {
+    title: "Playground",
+    label: "playground",
+    url: "/playground",
+  },
 ]
 ---
 
@@ -34,7 +39,11 @@ const navItems = [
     {
       navItems.map((link) => (
         <a
-          class="nav-link relative block px-3 py-1.5 rounded-full transition-colors duration-200 hover:text-yellow-500 dark:hover:text-yellow-400"
+          class:list={[
+            "nav-link relative block px-3 py-1.5 rounded-full transition-all duration-200 hover:text-yellow-500 dark:hover:text-yellow-400",
+            link.label === "playground" &&
+              "border border-yellow-400/20 bg-yellow-400/10 text-yellow-800 shadow-[0_0_18px_rgba(251,191,36,0.12)] dark:text-yellow-200 dark:shadow-[0_0_20px_rgba(251,191,36,0.14)]",
+          ]}
           aria-label={link.label}
           href={link.url}
         >
@@ -50,42 +59,69 @@ const navItems = [
 
 <script>
   document.addEventListener("astro:page-load", () => {
-    const sections = document.querySelectorAll("section")
+    const sections = Array.from(document.querySelectorAll("[data-section]")) as HTMLElement[]
     const navItems = document.querySelectorAll("header nav a")
+    let animationFrameId = 0
 
-    const callback = (entries: any[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          navItems.forEach((item) => {
-            if (item.getAttribute("aria-label") == entry.target.id) {
-              item.classList.add("text-yellow-500", "dark:text-yellow-400", "bg-yellow-400/10")
-              item.classList.remove("text-gray-600", "dark:text-gray-300")
-            } else {
-              item.classList.remove("text-yellow-500", "dark:text-yellow-400", "bg-yellow-400/10")
-              item.classList.add("text-gray-600", "dark:text-gray-300")
-            }
-          })
-        }
+    const setActiveNav = (activeId: string | null) => {
+      navItems.forEach((item) => {
+        const isActive = activeId !== null && item.getAttribute("aria-label") === activeId
+
+        item.classList.toggle("text-yellow-500", isActive)
+        item.classList.toggle("dark:text-yellow-400", isActive)
+        item.classList.toggle("bg-yellow-400/10", isActive)
+        item.classList.toggle("text-gray-600", !isActive)
+        item.classList.toggle("dark:text-gray-300", !isActive)
       })
     }
 
-    const observer = new IntersectionObserver(callback, {
-      root: null,
-      rootMargin: "0px",
-      threshold: 0.3,
-    })
+    const updateActiveNav = () => {
+      const triggerLine = window.scrollY + window.innerHeight * 0.35
+      const bottomThreshold = document.documentElement.scrollHeight - window.innerHeight - 96
 
-    sections.forEach((section) => {
-      observer.observe(section)
-    })
+      if (window.scrollY >= bottomThreshold) {
+        setActiveNav("sobre-mi")
+        return
+      }
+
+      let activeId: string | null = null
+
+      sections.forEach((section) => {
+        if (section.offsetTop <= triggerLine) {
+          activeId = section.id
+        }
+      })
+
+      setActiveNav(activeId)
+    }
+
+    const scheduleUpdate = () => {
+      if (animationFrameId !== 0) {
+        return
+      }
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = 0
+        updateActiveNav()
+      })
+    }
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true })
+    window.addEventListener("resize", scheduleUpdate)
+    updateActiveNav()
 
     document.onvisibilitychange = () => {
       if (document.visibilityState === "hidden") {
-        observer.disconnect()
+        window.removeEventListener("scroll", scheduleUpdate)
+        window.removeEventListener("resize", scheduleUpdate)
+        if (animationFrameId !== 0) {
+          window.cancelAnimationFrame(animationFrameId)
+          animationFrameId = 0
+        }
       } else {
-        sections.forEach((section) => {
-          observer.observe(section)
-        })
+        window.addEventListener("scroll", scheduleUpdate, { passive: true })
+        window.addEventListener("resize", scheduleUpdate)
+        updateActiveNav()
       }
     }
   })
@@ -104,6 +140,14 @@ const navItems = [
 
   .nav-link.text-yellow-500 {
     @apply font-semibold;
+  }
+
+  .nav-link[aria-label="playground"] {
+    @apply ring-0;
+  }
+
+  .nav-link[aria-label="playground"]:hover {
+    @apply shadow-[0_0_22px_rgba(251,191,36,0.16)];
   }
 
   @keyframes nav-appear {

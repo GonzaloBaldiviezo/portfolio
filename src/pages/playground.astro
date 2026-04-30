@@ -1,0 +1,422 @@
+---
+import Layout from "@/layouts/Layout.astro"
+import SectionContainer from "@/components/SectionContainer.astro"
+---
+
+<Layout
+  title="Gonzalo's Portfolio - Playground"
+  description="An interactive sketch where falling sand builds colorful layers and slowly shifts through a changing palette."
+>
+  <main class="px-4 pt-24 pb-16">
+    <SectionContainer class="py-10 md:py-16">
+      <div class="max-w-7xl space-y-6">
+        <div class="space-y-3 anim-fade-in">
+          <p class="text-sm font-semibold tracking-[0.25em] uppercase text-yellow-500/90 dark:text-yellow-400/90">
+            Playground
+          </p>
+          <h1 class="text-4xl font-bold tracking-tight text-black/90 dark:text-white sm:text-5xl">
+            A falling sand sketch in motion.
+          </h1>
+          <p class="text-base leading-7 text-black/70 dark:text-white/70 sm:text-lg">
+            Paint with sand, build little mountains, and reset whenever you want. The colors drift
+            slowly over time, so the pile starts to feel more like a living collage than a static pile.
+          </p>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-[1fr]">
+          <div class="rounded-3xl border border-black/10 bg-white/75 p-4 shadow-lg shadow-black/5 backdrop-blur dark:border-white/10 dark:bg-white/5 sm:p-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-4 dark:border-white/10">
+              <div>
+                <p class="text-sm font-medium text-black/60 dark:text-white/60">Canvas</p>
+                <p class="mt-1 text-lg font-semibold text-black/90 dark:text-white">Falling Sand Sandbox</p>
+              </div>
+
+              <button
+                type="button"
+                data-action="clear"
+                class="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-3 py-1.5 text-sm font-medium text-yellow-800 transition hover:bg-yellow-400/15 dark:text-yellow-200"
+              >
+                Reset
+              </button>
+            </div>
+
+            <div class="mt-4 overflow-hidden rounded-2xl border border-black/10 bg-neutral-100/90 p-2 dark:border-white/10 dark:bg-black/20 sm:p-3">
+              <div class="relative h-[68vh] min-h-[520px] w-full overflow-hidden rounded-xl border border-black/10 bg-[#0f1115] shadow-inner shadow-black/20 dark:border-white/10">
+                <canvas
+                  id="falling-sand-canvas"
+                  class="block h-full w-full touch-none"
+                  aria-label="Falling sand simulator"
+                ></canvas>
+                <div class="pointer-events-none absolute left-4 top-4 rounded-full bg-black/35 px-3 py-1 text-xs font-medium tracking-wide text-white/90 backdrop-blur">
+                  Drag to paint
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <a
+            href="/"
+            class="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white/80 px-4 py-2 text-sm font-medium text-black/80 shadow-sm transition hover:border-yellow-400/40 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+          >
+            ← Back to home
+          </a>
+        </div>
+      </div>
+    </SectionContainer>
+  </main>
+
+  <script>
+    const CELL_SIZE = 5
+    const DEFAULT_BRUSH_RADIUS = 1
+    const PAINT_DENSITY = 0.5
+    const GRAVITY = 0.5
+    const MAX_FALL_SPEED = 10.5
+    const SIMULATION_SUBSTEPS = 3
+    const WALL_MARGIN = 2
+    const COLOR_PALETTE = [
+      28,
+      44,
+      60,
+      82,
+      118,
+      168,
+      206,
+      246,
+      286,
+      320,
+    ]
+    const COLOR_HOLD_FRAMES = 1100
+    const COLOR_BLEND_SPEED = 0.0014
+    const MATERIALS = {
+      empty: 0,
+      sand: 1,
+    }
+
+    let animationFrame = 0
+    let cleanupCurrentRun = () => {
+      window.cancelAnimationFrame(animationFrame)
+    }
+
+    const initPlayground = () => {
+      cleanupCurrentRun()
+
+      const canvas = document.getElementById("falling-sand-canvas")
+      const resetButton = document.querySelector("[data-action='clear']")
+
+      if (!(canvas instanceof HTMLCanvasElement) || !resetButton) {
+        return
+      }
+
+      const context = canvas.getContext("2d")
+      if (!context) {
+        return
+      }
+
+      let gridWidth = 0
+      let gridHeight = 0
+      let cells = new Uint8Array(0)
+      let nextCells = new Uint8Array(0)
+      let velocityGrid = new Float32Array(0)
+      let nextVelocityGrid = new Float32Array(0)
+      let hueGrid = new Uint16Array(0)
+      let nextHueGrid = new Uint16Array(0)
+      const brushRadius = DEFAULT_BRUSH_RADIUS
+      let drawing = false
+      let lastPointer: { x: number; y: number } | null = null
+      let paletteIndex = 0
+      let nextPaletteIndex = 1
+      let paletteProgress = 0
+      let paletteHold = 0
+      let globalHue = COLOR_PALETTE[0]
+
+      const blendHue = (startHue: number, endHue: number, amount: number) => {
+        const delta = ((((endHue - startHue) % 360) + 540) % 360) - 180
+        return (startHue + delta * amount + 360) % 360
+      }
+
+      const smoothStep = (value: number) => value * value * (3 - 2 * value)
+
+      const index = (x: number, y: number) => y * gridWidth + x
+
+      const inBounds = (x: number, y: number) => x >= 0 && x < gridWidth && y >= 0 && y < gridHeight
+
+      const isBorderCell = (x: number, y: number) =>
+        x < WALL_MARGIN || x >= gridWidth - WALL_MARGIN || y >= gridHeight - WALL_MARGIN
+
+      const resetBoundaries = (targetCells: Uint8Array, targetVelocityGrid: Float32Array) => {
+        for (let y = 0; y < gridHeight; y += 1) {
+          for (let x = 0; x < gridWidth; x += 1) {
+            if (!isBorderCell(x, y)) {
+              continue
+            }
+
+            const cellIndex = index(x, y)
+            targetCells[cellIndex] = MATERIALS.empty
+            targetVelocityGrid[cellIndex] = 0
+          }
+        }
+      }
+
+      const resizeCanvas = () => {
+        const parent = canvas.parentElement
+        if (!parent) return
+
+        const width = parent.clientWidth
+        const height = parent.clientHeight
+        const nextWidth = Math.max(320, Math.floor(width))
+        const nextHeight = Math.max(240, Math.floor(height))
+        const pixelRatio = window.devicePixelRatio || 1
+
+        canvas.style.width = `${nextWidth}px`
+        canvas.style.height = `${nextHeight}px`
+        canvas.width = Math.floor(nextWidth * pixelRatio)
+        canvas.height = Math.floor(nextHeight * pixelRatio)
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+
+        gridWidth = Math.floor(nextWidth / CELL_SIZE)
+        gridHeight = Math.floor(nextHeight / CELL_SIZE)
+        cells = new Uint8Array(gridWidth * gridHeight)
+        nextCells = new Uint8Array(gridWidth * gridHeight)
+        velocityGrid = new Float32Array(gridWidth * gridHeight)
+        nextVelocityGrid = new Float32Array(gridWidth * gridHeight)
+        hueGrid = new Uint16Array(gridWidth * gridHeight)
+        nextHueGrid = new Uint16Array(gridWidth * gridHeight)
+        context.imageSmoothingEnabled = false
+        resetBoundaries(cells, velocityGrid)
+        resetBoundaries(nextCells, nextVelocityGrid)
+      }
+
+      const clearGrid = () => {
+        cells.fill(MATERIALS.empty)
+        nextCells.fill(MATERIALS.empty)
+        velocityGrid.fill(0)
+        nextVelocityGrid.fill(0)
+        hueGrid.fill(0)
+        nextHueGrid.fill(0)
+        resetBoundaries(cells, velocityGrid)
+        resetBoundaries(nextCells, nextVelocityGrid)
+      }
+
+      const paintAt = (pointerX: number, pointerY: number, radius = brushRadius) => {
+        const rect = canvas.getBoundingClientRect()
+        const x = Math.floor(((pointerX - rect.left) / rect.width) * gridWidth)
+        const y = Math.floor(((pointerY - rect.top) / rect.height) * gridHeight)
+
+        for (let dy = -radius; dy <= radius; dy += 1) {
+          for (let dx = -radius; dx <= radius; dx += 1) {
+            if (dx * dx + dy * dy > radius * radius) continue
+            if (Math.random() > PAINT_DENSITY) continue
+            const px = x + dx
+            const py = y + dy
+            if (!inBounds(px, py) || isBorderCell(px, py)) continue
+            cells[index(px, py)] = MATERIALS.sand
+            velocityGrid[index(px, py)] = 0
+            hueGrid[index(px, py)] = (globalHue + py * 2 + dx - dy) % 360
+          }
+        }
+      }
+
+      const drawCell = (x: number, y: number, hue: number) => {
+        context.fillStyle = `hsl(${hue} 88% 60%)`
+        context.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+
+      const tryMove = (
+        _sourceX: number,
+        _sourceY: number,
+        targetX: number,
+        targetY: number,
+        material: number,
+        velocity: number,
+      ) => {
+        if (!inBounds(targetX, targetY)) return false
+        if (isBorderCell(targetX, targetY)) return false
+        const targetIndex = index(targetX, targetY)
+        if (nextCells[targetIndex] !== MATERIALS.empty) return false
+        nextCells[targetIndex] = material
+        nextVelocityGrid[targetIndex] = velocity
+        nextHueGrid[targetIndex] = hueGrid[index(_sourceX, _sourceY)]
+        return true
+      }
+
+      const stepSimulation = () => {
+        nextCells.fill(MATERIALS.empty)
+        nextVelocityGrid.fill(0)
+        nextHueGrid.fill(0)
+        resetBoundaries(nextCells, nextVelocityGrid)
+
+        for (let y = gridHeight - 1; y >= 0; y -= 1) {
+          for (let x = 0; x < gridWidth; x += 1) {
+            const currentIndex = index(x, y)
+            const material = cells[currentIndex]
+            const currentVelocity = velocityGrid[currentIndex]
+            const currentHue = hueGrid[currentIndex]
+
+            if (material === MATERIALS.empty) {
+              continue
+            }
+
+            const nextVelocity = Math.min(MAX_FALL_SPEED, currentVelocity * 1.22 + GRAVITY)
+            const fallDistance = Math.max(1, Math.floor(nextVelocity))
+            let moved = false
+
+            for (let step = 1; step <= fallDistance; step += 1) {
+              const targetY = y + step
+
+              const down = [x, targetY]
+              const downLeft = [x - 1, targetY]
+              const downRight = [x + 1, targetY]
+              const diagonalOrder = Math.random() < 0.5 ? [downLeft, downRight] : [downRight, downLeft]
+
+              if (tryMove(x, y, down[0], down[1], material, nextVelocity)) {
+                moved = true
+                break
+              }
+
+              if (tryMove(x, y, diagonalOrder[0][0], diagonalOrder[0][1], material, nextVelocity * 0.9)) {
+                moved = true
+                break
+              }
+
+              if (tryMove(x, y, diagonalOrder[1][0], diagonalOrder[1][1], material, nextVelocity * 0.9)) {
+                moved = true
+                break
+              }
+            }
+
+            if (!moved) {
+              nextCells[currentIndex] = material
+              nextVelocityGrid[currentIndex] = currentVelocity * 0.04
+              nextHueGrid[currentIndex] = currentHue
+            }
+          }
+        }
+
+        const temp = cells
+        cells = nextCells
+        nextCells = temp
+        const tempVelocity = velocityGrid
+        velocityGrid = nextVelocityGrid
+        nextVelocityGrid = tempVelocity
+        const tempHue = hueGrid
+        hueGrid = nextHueGrid
+        nextHueGrid = tempHue
+      }
+
+      const render = () => {
+        const width = canvas.clientWidth
+        const height = canvas.clientHeight
+
+        context.clearRect(0, 0, width, height)
+        context.fillStyle = "#0f1115"
+        context.fillRect(0, 0, width, height)
+
+        for (let y = 0; y < gridHeight; y += 1) {
+          for (let x = 0; x < gridWidth; x += 1) {
+            const material = cells[index(x, y)]
+            if (material !== MATERIALS.empty) {
+              drawCell(x, y, hueGrid[index(x, y)])
+            }
+          }
+        }
+
+        context.fillStyle = "rgba(255, 255, 255, 0.03)"
+        for (let x = 0; x < width; x += CELL_SIZE * 4) {
+          context.fillRect(x, 0, 1, height)
+        }
+        for (let y = 0; y < height; y += CELL_SIZE * 4) {
+          context.fillRect(0, y, width, 1)
+        }
+      }
+
+      const loop = () => {
+        paletteHold += 1
+        if (paletteHold > COLOR_HOLD_FRAMES) {
+          paletteProgress = Math.min(1, paletteProgress + COLOR_BLEND_SPEED)
+          if (paletteProgress >= 1) {
+            paletteIndex = nextPaletteIndex
+            nextPaletteIndex = (nextPaletteIndex + 1) % COLOR_PALETTE.length
+            paletteProgress = 0
+            paletteHold = 0
+          }
+        }
+
+        globalHue = blendHue(
+          COLOR_PALETTE[paletteIndex],
+          COLOR_PALETTE[nextPaletteIndex],
+          smoothStep(paletteProgress),
+        )
+        for (let step = 0; step < SIMULATION_SUBSTEPS; step += 1) {
+          stepSimulation()
+        }
+        render()
+        animationFrame = window.requestAnimationFrame(loop)
+      }
+
+      const handleResetClick = () => {
+        clearGrid()
+      }
+
+      const handlePointerDown = (event: PointerEvent) => {
+        drawing = true
+        canvas.setPointerCapture(event.pointerId)
+        paintAt(event.clientX, event.clientY)
+        lastPointer = { x: event.clientX, y: event.clientY }
+      }
+
+      const handlePointerMove = (event: PointerEvent) => {
+        if (!drawing || !lastPointer) return
+        const distance = Math.hypot(event.clientX - lastPointer.x, event.clientY - lastPointer.y)
+        const steps = Math.max(1, Math.ceil(distance / 4))
+
+        for (let step = 0; step <= steps; step += 1) {
+          const mix = step / steps
+          const x = lastPointer.x + (event.clientX - lastPointer.x) * mix
+          const y = lastPointer.y + (event.clientY - lastPointer.y) * mix
+          paintAt(x, y)
+        }
+
+        lastPointer = { x: event.clientX, y: event.clientY }
+      }
+
+      const stopDrawing = () => {
+        drawing = false
+        lastPointer = null
+      }
+
+      resetButton.addEventListener("click", handleResetClick)
+      canvas.addEventListener("pointerdown", handlePointerDown)
+      canvas.addEventListener("pointermove", handlePointerMove)
+      canvas.addEventListener("pointerup", stopDrawing)
+      canvas.addEventListener("pointercancel", stopDrawing)
+      canvas.addEventListener("pointerleave", stopDrawing)
+
+      const handleResize = () => {
+        resizeCanvas()
+        clearGrid()
+      }
+
+      window.addEventListener("resize", handleResize)
+
+      resizeCanvas()
+      clearGrid()
+      loop()
+
+      cleanupCurrentRun = () => {
+        window.cancelAnimationFrame(animationFrame)
+        resetButton.removeEventListener("click", handleResetClick)
+        canvas.removeEventListener("pointerdown", handlePointerDown)
+        canvas.removeEventListener("pointermove", handlePointerMove)
+        canvas.removeEventListener("pointerup", stopDrawing)
+        canvas.removeEventListener("pointercancel", stopDrawing)
+        canvas.removeEventListener("pointerleave", stopDrawing)
+        window.removeEventListener("resize", handleResize)
+      }
+    }
+
+    document.addEventListener("astro:page-load", initPlayground)
+    document.addEventListener("astro:before-swap", () => {
+      cleanupCurrentRun()
+    })
+  </script>
+</Layout>
