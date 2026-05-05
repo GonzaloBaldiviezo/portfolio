@@ -1,9 +1,10 @@
 [
   {
     "date": "September 2022 - Present",
-    "title": "QA Automation Engineer",
+    "title": "QA Automation Engineer & Team Lead",
     "company": "Revai",
     "description": [
+      "Led backend and full-stack development teams, coordinating feature delivery and project execution within the squad.",
       "Built and maintained automated tests for APIs and frontend flows using Playwright and TypeScript, contributing to a suite of 3000+ API tests and 200+ E2E tests.",
       "Developed an internal platform to centralize test execution, reporting, and coverage across services, used to manage and monitor daily test runs.",
       "Enabled automated scheduling of test runs and reporting, improving visibility and reducing manual effort across teams.",
