@@ -5,8 +5,10 @@ import AboutMe from "@/components/AboutMe.astro"
 import Briefcase from "@/components/icons/Briefcase.astro"
 import CodeDots from "@/components/icons/CodeDots.astro"
 import Experience from "@/components/Experience.astro"
+import Checklist from "@/components/icons/Checklist.astro"
 import UserHeart from "@/components/icons/UserHeart.astro"
 import Projects from "@/components/Projects.astro"
+import Skills from "@/components/Skills.astro"
 import SectionContainer from "@/components/SectionContainer.astro"
 import Hero from "@/components/Hero.astro"
 import TitleSection from "@/components/TitleSection.astro"
@@ -18,8 +20,7 @@ import TitleSection from "@/components/TitleSection.astro"
 >
   <main class="px-4">
     <SectionContainer class="py-16 md:py-36">
-      <Hero>
-    </Hero>
+      <Hero />
     </SectionContainer>
     <div class="space-y-24">
     <SectionContainer id="experiencia">
@@ -32,11 +33,30 @@ import TitleSection from "@/components/TitleSection.astro"
 
     <SectionContainer id="proyectos">
       <TitleSection>
-        <CodeDots class="size-7" />
+        <CodeDots class="size-8" />
         Projects
       </TitleSection>
       <Projects />
     </SectionContainer>
+
+    <SectionContainer id="skills">
+      <TitleSection>
+        <Checklist class="size-8" />
+        Skills
+      </TitleSection>
+      <Skills />
+    </SectionContainer>
+
+    <div class="section-separator flex justify-center py-20 md:py-32" aria-hidden="true">
+      <div class="separator-track flex w-full max-w-xl items-center gap-4 px-4">
+        <span class="separator-line left h-[2px] flex-1 rounded-full bg-gradient-to-r from-transparent via-yellow-400/70 to-transparent shadow-[0_0_18px_rgba(251,191,36,0.18)]"></span>
+        <span class="separator-dot relative flex size-3 items-center justify-center">
+          <span class="absolute inline-flex size-3 rounded-full bg-yellow-400/30 blur-[2px]"></span>
+          <span class="relative inline-flex size-1.5 rounded-full bg-yellow-400"></span>
+        </span>
+        <span class="separator-line right h-[2px] flex-1 rounded-full bg-gradient-to-r from-transparent via-yellow-400/70 to-transparent shadow-[0_0_18px_rgba(251,191,36,0.18)]"></span>
+      </div>
+    </div>
 
     <SectionContainer id="sobre-mi">
       <TitleSection>
@@ -48,3 +68,70 @@ import TitleSection from "@/components/TitleSection.astro"
   </div>
   </main>
 </Layout>
+
+<style>
+  @keyframes separator-grow-left {
+    from {
+      opacity: 0.18;
+      transform: scaleX(0.12);
+    }
+    to {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes separator-grow-right {
+    from {
+      opacity: 0.18;
+      transform: scaleX(0.12);
+    }
+    to {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes separator-dot-pop {
+    from {
+      transform: scale(0.8);
+      opacity: 0.6;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    .section-separator {
+      animation: separator-dot-pop 0.7s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+
+    .separator-line.left {
+      transform-origin: right center;
+      animation: separator-grow-left 0.9s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 60%;
+    }
+
+    .separator-line.right {
+      transform-origin: left center;
+      animation: separator-grow-right 0.9s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 60%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-separator,
+    .separator-line.left,
+    .separator-line.right {
+      animation: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+</style>

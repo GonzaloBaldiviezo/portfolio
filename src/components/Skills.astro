@@ -1,0 +1,95 @@
+---
+const SKILLS = [
+  {
+    title: "Playwright",
+    description: "Strong end-to-end automation for modern web apps.",
+  },
+  {
+    title: "API Testing",
+    description: "Reliable validation of backend flows and contracts.",
+  },
+  {
+    title: "k6",
+    description: "Performance checks for critical APIs and flows.",
+  },
+  {
+    title: "Automation Framework Design",
+    description: "Scalable test architecture that stays maintainable.",
+  },
+  {
+    title: "Test Strategy",
+    description: "Clear coverage decisions aligned with risk.",
+  },
+  {
+    title: "CI/CD",
+    description: "Automation integrated into the delivery pipeline.",
+  },
+  {
+    title: "JavaScript",
+    description: "Practical scripting for tests and tooling.",
+  },
+  {
+    title: "Node.js",
+    description: "Runtime for automation utilities and test tooling.",
+  },
+  {
+    title: "TypeScript",
+    description: "Typed automation and maintainable test code.",
+  },
+  {
+    title: "Regression Testing",
+    description: "Fast feedback before changes reach production.",
+  },
+  {
+    title: "GitHub",
+    description: "Version control and collaboration in daily work.",
+  },
+  {
+    title: "REST API",
+    description: "Understanding and validating service contracts.",
+  },
+  {
+    title: "Postman",
+    description: "Quick API checks and exploratory validation.",
+  },
+  {
+    title: "Manual Testing",
+    description: "Hands-on verification for edge cases and flows.",
+  },
+  {
+    title: "Smoke Testing",
+    description: "Fast confidence checks after each deploy.",
+  },
+  {
+    title: "End-to-End Testing",
+    description: "Coverage for critical user journeys.",
+  },
+] as const
+---
+
+<div class="flex flex-wrap gap-3">
+  {
+    SKILLS.map(({ title, description }) => (
+      <article class="group relative">
+        <button
+          type="button"
+          class="inline-flex items-center rounded-full border border-black/10 bg-white/75 px-4 py-2 text-sm font-medium text-black/80 shadow-[0_12px_30px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-yellow-400/40 hover:bg-white hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/70 dark:border-white/10 dark:bg-black/20 dark:text-white/85 dark:hover:bg-black/30"
+          aria-describedby={`skill-${title.replace(/\s+/g, "-").toLowerCase()}`}
+        >
+          <span class="whitespace-nowrap">{title}</span>
+        </button>
+
+        <div
+          id={`skill-${title.replace(/\s+/g, "-").toLowerCase()}`}
+          class="pointer-events-none absolute left-0 top-full z-20 mt-2 w-[min(18rem,calc(100vw-2rem))] translate-y-1 rounded-2xl border border-black/10 bg-white/95 p-3 text-sm text-black shadow-[0_20px_50px_-28px_rgba(0,0,0,0.45)] opacity-0 transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:border-white/10 dark:bg-black/90 dark:text-white"
+        >
+          <p class="leading-6 text-black/75 dark:text-white/75">
+            {description}
+          </p>
+        </div>
+
+        <span class="sr-only">{description}</span>
+      </article>
+    ))
+  }
+</div>
