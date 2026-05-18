@@ -1,11 +1,11 @@
 ---
-const personalImageAlt = "Miguel Ángel"
+const personalImageAlt = "Portrait of Gonzalo Baldiviezo"
 import Badge from "@/components/Badge.astro"
 import GitHubIcon from "@/components/icons/GitHub.astro"
 import LinkedInIcon from "@/components/icons/LinkedIn.astro"
 import MailIcon from "@/components/icons/Mail.astro"
 import SparklesIcon from "@/components/icons/Sparkles.astro"
-import SocialPill from "@/components/SocialPill.astro"
+import PillLink from "@/components/PillLink.astro"
 ---
 
 <div class="mx-auto max-w-xl text-center md:mx-0 md:text-left">
@@ -21,6 +21,7 @@ import SocialPill from "@/components/SocialPill.astro"
         class="relative rounded-full shadow-2xl size-20 object-cover object-center ring-2 ring-yellow-400/60 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-950"
         src="/gonza-profile.webp"
         alt={personalImageAlt}
+        loading="lazy"
       />
     </div>
     <a
@@ -51,17 +52,17 @@ import SocialPill from "@/components/SocialPill.astro"
     class="anim-fade-in anim-delay-3 mt-8 flex flex-wrap justify-center gap-4 md:justify-start"
     aria-label="Redes sociales y contacto"
   >
-    <SocialPill href="mailto:gonzabaldiviezo@gmail.com">
+    <PillLink href="mailto:gonzabaldiviezo@gmail.com">
       <MailIcon class="size-4" />
       Contact me
-    </SocialPill>
-    <SocialPill href="https://linkedin.com/in/gonzalobaldiviezo">
+    </PillLink>
+    <PillLink href="https://linkedin.com/in/gonzalobaldiviezo">
       <LinkedInIcon class="size-4" />
       LinkedIn
-    </SocialPill>
-    <SocialPill href="https://github.com/GonzaloBaldiviezo">
+    </PillLink>
+    <PillLink href="https://github.com/GonzaloBaldiviezo">
       <GitHubIcon class="size-4" />
       GitHub
-    </SocialPill>
+    </PillLink>
   </nav>
 </div>

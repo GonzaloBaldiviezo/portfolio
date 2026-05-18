@@ -1,0 +1,27 @@
+---
+interface Props {
+  href: string
+  variant?: "pill" | "button"
+  [key: string]: unknown
+}
+
+const { href, variant = "pill", ...rest } = Astro.props
+
+const base =
+  "inline-flex items-center justify-center gap-2 max-w-fit border border-gray-300 bg-gray-100 text-gray-800 transition dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-yellow-500/80 active:bg-black"
+
+const variants: Record<"pill" | "button", string> = {
+  pill: "rounded-full px-4 py-1 text-sm hover:border-gray-700 hover:bg-gray-900 hover:text-white dark:hover:border-gray-300 dark:hover:bg-gray-100 dark:hover:text-black",
+  button: "rounded-xl px-3 py-2 text-base hover:border-gray-900 hover:bg-gray-800 hover:text-white",
+}
+---
+
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  class={`${base} ${variants[variant]}`}
+  {...rest}
+>
+  <slot />
+</a>

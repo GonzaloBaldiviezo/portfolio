@@ -7,7 +7,7 @@ import Tailwind from "./icons/Tailwind.astro"
 import TypeScript from "./icons/TypeScript.astro"
 import K6 from "./icons/K6.astro"
 import ExternalLink from "./icons/ExternalLink.astro"
-import LinkButton from "./LinkButton.astro"
+import PillLink from "./PillLink.astro"
 import projectsData from "@/data/projects.json"
 
 const GITHUB_PROFILE_URL = "https://github.com/GonzaloBaldiviezo?tab=repositories"
@@ -83,16 +83,16 @@ const PROJECTS = projectsData.map((project: (typeof projectsData)[number] & { li
     <p class="mt-3 text-gray-700 dark:text-gray-400 text-pretty">{description}</p>
     <footer class="flex items-center mt-4 gap-x-4">
       {github && (
-        <LinkButton href={github}>
+        <PillLink href={github} variant="button">
           <GitHub class="size-5" />
           Code
-        </LinkButton>
+        </PillLink>
       )}
       {link && (
-        <LinkButton href={link}>
+        <PillLink href={link} variant="button">
           <ExternalLink class="size-4" />
           Preview
-        </LinkButton>
+        </PillLink>
       )}
     </footer>
   </div>
@@ -101,10 +101,10 @@ const PROJECTS = projectsData.map((project: (typeof projectsData)[number] & { li
   }
 
   <div class="flex justify-center pt-2">
-    <LinkButton href={GITHUB_PROFILE_URL}>
+    <PillLink href={GITHUB_PROFILE_URL} variant="button">
       <GitHub class="size-5" />
       See more on GitHub
-    </LinkButton>
+    </PillLink>
   </div>
 </div>
 
